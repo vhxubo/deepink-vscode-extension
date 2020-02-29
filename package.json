@@ -1,0 +1,206 @@
+{
+	"name": "deepink-vscode-extension",
+	"displayName": "Awesome DeepInk",
+	"description": "厚墨投屏扩展",
+	"version": "0.0.1",
+	"engines": {
+		"vscode": "^1.42.0"
+	},
+	"categories": [
+		"Other",
+		"Snippets"
+	],
+	"activationEvents": [
+		"onCommand:deepInk.setHost",
+		"onCommand:deepInk.setKey",
+		"onCommand:deepInk.debug",
+		"onCommand:deepInk.debugAuto",
+		"onCommand:deepInk.debugRank",
+		"onCommand:deepInk.debugSearch",
+		"onCommand:deepInk.install",
+		"onCommand:deepInk.debugDetail",
+		"onCommand:deepInk.debugCatalog",
+		"onCommand:deepInk.debugChapter",
+		"onView:deepink-explorer",
+		"onCommand:deepInk.openJsonpath",
+		"onCommand:deepInk.openJsoup"
+	],
+	"main": "./out/extension.js",
+	"icon": "./res/media/icon.png",
+	"contributes": {
+		"commands": [{
+				"command": "deepInk.setHost",
+				"title": "DeepInk: Set Host"
+			},
+			{
+				"command": "deepInk.setKey",
+				"title": "DeepInk: Set Search Key"
+			},
+			{
+				"command": "deepInk.debug",
+				"title": "DeepInk: Debug Set Source",
+				"icon": {
+					"light": "res/media/icon.svg",
+					"dark": "res/media/icon.svg"
+				}
+			},
+			{
+				"command": "deepInk.debugAuto",
+				"title": "DeepInk: Debug Auto",
+				"icon": {
+					"light": "res/media/icon.svg",
+					"dark": "res/media/icon.svg"
+				}
+			},
+			{
+				"command": "deepInk.debugRank",
+				"title": "DeepInk: Debug Rank",
+				"icon": {
+					"light": "res/media/icon.svg",
+					"dark": "res/media/icon.svg"
+				}
+			},
+			{
+				"command": "deepInk.debugSearch",
+				"title": "DeepInk: Debug Search",
+				"icon": {
+					"light": "res/media/icon.svg",
+					"dark": "res/media/icon.svg"
+				}
+			},
+			{
+				"command": "deepInk.debugDetail",
+				"title": "DeepInk: Debug Detail"
+			},
+			{
+				"command": "deepInk.debugCatalog",
+				"title": "DeepInk: Debug Catalog"
+			},
+			{
+				"command": "deepInk.debugChapter",
+				"title": "DeepInk: Debug Chapter"
+			},
+			{
+				"command": "deepInk.install",
+				"title": "DeepInk: Install",
+				"icon": {
+					"light": "res/media/icon.svg",
+					"dark": "res/media/icon.svg"
+				}
+			},
+			{
+				"command": "deepInk.openJsoup",
+				"title": "DeepInk: Open Jsoup"
+			},
+			{
+				"command": "deepInk.openJsonpath",
+				"title": "DeepInk: Open Jsonpath"
+			}
+		],
+		"configuration": {
+			"type": "object",
+			"title": "Awesome DeepInk",
+			"properties": {
+				"awesomeDeepInk.host": {
+					"type": "string",
+					"default": "http://192.168.1.112:8888",
+					"description": "厚墨投屏上的完整链接"
+				},
+				"awesomeDeepInk.key": {
+					"type": "string",
+					"default": "剑来",
+					"description": "搜索的关键词"
+				}
+			}
+		},
+		"viewsContainers": {
+			"activitybar": [{
+				"id": "deepink-explorer",
+				"title": "厚墨",
+				"icon": "res/media/icon.svg"
+			}]
+		},
+		"views": {
+			"deepink-explorer": [{
+					"id": "deepink-debug",
+					"name": "调试"
+				},
+				{
+					"id": "deepink-read",
+					"name": "阅读"
+				}
+			]
+		},
+		"menus": {
+			"view/title": [{
+					"command": "deepInk.setHost",
+					"when": "view == deepink-debug",
+					"group": "more@0"
+				},
+				{
+					"command": "deepInk.setKey",
+					"when": "view == deepink-debug",
+					"group": "more@1"
+				},
+				{
+					"command": "deepInk.openJsoup",
+					"when": "view == deepink-debug",
+					"group": "more@2"
+				}, {
+					"command": "deepInk.openJsonpath",
+					"when": "view == deepink-debug",
+					"group": "more@3"
+				},
+				{
+					"command": "deepInk.debug",
+					"when": "view == deepink-debug",
+					"group": "navigation@0"
+				},
+				{
+					"command": "deepInk.debugAuto",
+					"when": "view == deepink-debug",
+					"group": "navigation@1"
+				},
+				{
+					"command": "deepInk.debugRank",
+					"when": "view == deepink-debug",
+					"group": "navigation@2"
+				}
+			],
+			"view/item/context": [{
+				"command": "deepInk.debugSearch",
+				"when": "view == deepink-debug&&viewItem == debug",
+				"group": "inline"
+			}]
+		},
+		"snippets": [{
+			"language": "json",
+			"path": "snippets.json"
+		}]
+	},
+	"scripts": {
+		"vscode:prepublish": "yarn run compile",
+		"compile": "tsc -p ./",
+		"lint": "eslint src --ext ts",
+		"watch": "tsc -watch -p ./",
+		"pretest": "yarn run compile && yarn run lint",
+		"test": "node ./out/test/runTest.js"
+	},
+	"devDependencies": {
+		"@types/glob": "^7.1.1",
+		"@types/mocha": "^7.0.1",
+		"@types/node": "^12.11.7",
+		"@types/vscode": "^1.42.0",
+		"@typescript-eslint/eslint-plugin": "^2.18.0",
+		"@typescript-eslint/parser": "^2.18.0",
+		"eslint": "^6.8.0",
+		"glob": "^7.1.6",
+		"mocha": "^7.0.1",
+		"typescript": "^3.7.5",
+		"vscode-test": "^1.3.0"
+	},
+	"dependencies": {
+		"axios": "^0.19.2",
+		"open": "^7.0.2"
+	}
+}
