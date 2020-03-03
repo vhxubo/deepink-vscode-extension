@@ -7,13 +7,12 @@ export class DebugView {
 	constructor(
 		protected context: vscode.ExtensionContext
 	) {
-	}
+	};
 
-	public static show(json: object) {
-		const panel = vscode.window.createWebviewPanel('debugView', '返回结果', vscode.ViewColumn.Three, { enableScripts: true, retainContextWhenHidden: true });
+	static show(json: object, category: string) {
+		const panel = vscode.window.createWebviewPanel('debugView', `${category} Result`, vscode.ViewColumn.Two, { enableScripts: true, retainContextWhenHidden: true });
 		panel.webview.html = this.getWebviewContent();
 		const formatter = JSONFormatter.jsonToHTML(json);
-		console.log(formatter);
 		panel.webview.postMessage({ formatJson: formatter });
 	}
 
@@ -32,14 +31,6 @@ export class DebugView {
 				  ul {
 					padding-inline-start: 20px;
 				}
-				.info{
-					color:red;
-					-webkit-user-select: none;
-            		-moz-user-select: none;
-            		-ms-user-select: none;
-            		user-select: none;
-				}
-				
 			  </style>
 			  </head>
 			  <body>
@@ -49,19 +40,7 @@ export class DebugView {
                     window.addEventListener('message', event => {
                         const message = event.data;
 						root.innerHTML = message.formatJson;
-
-						let ul = document.getElementsByClassName("array")[0];
-						let li = document.getElementsByTagName("li");
-						let arrays = Array.from(document.querySelectorAll('li'));
-			
-						ul.addEventListener('click', function (e) {
-							let item = e.target;
-							let index = arrays.indexOf(item);
-							console.log(li[index].innerText.replace('},', '}').replace('点击->',''));
-						});
 					});
-
-					
                 </script>
 			  </body>
 			  </html>

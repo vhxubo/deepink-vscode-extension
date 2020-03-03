@@ -11,25 +11,40 @@ export class DebugTreeViewProvider implements TreeDataProvider<DebugItem> {
     }
     getChildren(element?: DebugItem | undefined): ProviderResult<DebugItem[]> {
         if (element) {
-            let res_array = Array(this.context.workspaceState.get('res_search'));
-            console.log(res_array[0]);
-            return res_array[0].map(
-                (item: any) => new DebugItem(
-                    JSON.stringify(item),
-                    item as string,
-                    TreeItemCollapsibleState.None as TreeItemCollapsibleState
-                )
-            );
+            const label = element.label;
+            let res_array: any[] | undefined;
+            if (label === 'catalog' || label === 'search') {
+                res_array = this.context.workspaceState.get('res_' + label);
+            } else {
+                res_array = Array(this.context.workspaceState.get('res_' + label));
+            }
+            if (res_array !== undefined) {
+                return res_array.map(
+                    (item: any, index) => new DebugItem(
+                        JSON.stringify(item),
+                        TreeItemCollapsibleState.None,
+                        index,
+                        {
+                            command: 'deepInk.setIndex',
+                            title: '',
+                            arguments: [label, index]
+                        }
+                    )
+                );
+            }
 
         } else {
             return ['search', 'detail', 'catalog', 'chapter'].map(
                 item => new DebugItem(
-                    item as string,
-                    'debug',
-                    TreeItemCollapsibleState.Collapsed as TreeItemCollapsibleState
+                    item,
+                    TreeItemCollapsibleState.Collapsed
                 )
             );
         }
+    }
+
+    refresh() {
+        this._onDidChangeTreeData.fire();
     }
 
 }
@@ -37,11 +52,13 @@ export class DebugTreeViewProvider implements TreeDataProvider<DebugItem> {
 export class DebugItem extends TreeItem {
     constructor(
         public readonly label: string,
-        public type: string,
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+        public readonly index?: number,
+        public readonly command?: vscode.Command
+
     ) {
         super(label, collapsibleState);
     }
 
-    contextValue = (this.type === 'debug') ? 'debug' : 'dependency';
+    contextValue = (this.label === 'search') ? 'none' : (this.label === 'catalog' || this.label === 'detail' || this.label === 'chapter') ? 'post' : 'other';
 }

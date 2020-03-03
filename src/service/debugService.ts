@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import { StatusBar } from "../utils/statusBar";
 import * as axios from "axios";
-
 import { DebugView } from '../view/debugView';
+import { DebugItem } from "../view/debugTreeViewProvider";
 
 export const DEBUG_API = {
     debug: '/dev/debug',
@@ -19,6 +19,8 @@ export class DebugService {
     private debugStatusBar: StatusBar;
     private settingHost: string | undefined;
     private settingKey: string | undefined;
+    private searchIndex: number | undefined;
+    private catalogIndex: number | undefined;
 
     constructor(
         protected context: vscode.ExtensionContext
@@ -26,31 +28,11 @@ export class DebugService {
         this.debugStatusBar = new StatusBar();
         this.settingHost = vscode.workspace.getConfiguration().get('awesomeDeepInk.host');
         this.settingKey = vscode.workspace.getConfiguration().get('awesomeDeepInk.key');
+        this.searchIndex = Number(vscode.workspace.getConfiguration().get('awesomeDeepInk.searchIndex'));
+        this.catalogIndex = Number(vscode.workspace.getConfiguration().get('awesomeDeepInk.catalogIndex'));
     }
 
-    public async debug() {
-        let editor = vscode.window.activeTextEditor;
-        if (editor === undefined) {
-            vscode.window.showErrorMessage('未读取到相应文件，请使用 Vscode 打开书源文件后执行！');
-            this.debugStatusBar.hide();
-            return;
-        }
-        let document = editor.document;
-        let json = document.getText();
-        let url = this.settingHost + DEBUG_API['debug'];
-        console.info(url);
-        this.debugStatusBar.show();
-        try {
-            let response = await axios.default.post(url, json);
-            vscode.window.showInformationMessage(response.data.message);
-
-        } catch (error) {
-            vscode.window.showErrorMessage('连接失败！');
-        }
-        this.debugStatusBar.hide();
-    }
-
-    public setHost() {
+    setHost() {
         let value = 'http://192.168.1.112:8888';
         if (this.settingHost !== undefined) { value = this.settingHost; }
         vscode.window.showInputBox({
@@ -62,8 +44,8 @@ export class DebugService {
             if (host !== undefined || host.trim() !== '') {
                 vscode.workspace.getConfiguration().update('awesomeDeepInk.host', host, true);
                 this.settingHost = host;
-                axios.default.get(host).then(() => {
-                    vscode.window.showInformationMessage('厚墨书源开发者，欢迎回来！');
+                axios.default.get(host + '/api/user').then((response) => {
+                    vscode.window.showInformationMessage(`${response.data.name}，欢迎回来！`);
                 }).catch((error => {
                     vscode.window.showErrorMessage('连接 ' + this.settingHost + ' 失败！\n' + error);
                 }));
@@ -71,7 +53,14 @@ export class DebugService {
         });
     }
 
-    public setKey() {
+    setIndex(label: string, index: number) {
+        if (index !== undefined && (label === 'search' || label === 'catalog')) {
+            vscode.workspace.getConfiguration().update('awesomeDeepInk.' + label + 'Index', index, true);
+        }
+
+    }
+
+    setKey() {
         let value = '剑来';
         if (this.settingKey !== undefined) { value = this.settingKey; }
         vscode.window.showInputBox({
@@ -87,42 +76,128 @@ export class DebugService {
         });
     }
 
-    /**
-     * debugGet
-     */
-    public async debugGet(url: string) {
-        this.debugStatusBar.show();
-        try {
-            let response = await axios.default.get(this.settingHost + url, {
-                params: {
-                    key: this.settingKey
-                }
-            });
-            if (response.data.message) {
-                vscode.window.showInformationMessage(response.data.message);
-            } else {
-                DebugView.show(response.data);
-                let res_array: any = [];
-                response.data.forEach((element: any) => {
-                    res_array.push(element);
-                });
-                this.context.workspaceState.update('res_search', res_array);
-            }
+    getJson() {
+        let editor = vscode.window.activeTextEditor;
+        if (editor === undefined) {
+            vscode.window.showErrorMessage('未读取到相应文件，请使用 Vscode 打开书源文件后执行！');
+            return undefined;
         }
-        catch (error) {
-            vscode.window.showErrorMessage('连接失败！');
-        }
-        this.debugStatusBar.hide();
+        let document = editor.document;
+        let json = document.getText();
+        return json;
     }
 
-    public debugPost(url: string, params: any) {
+    getDebugInfo(category: string) {
+        let debugURL: string;
+        let debugRes: string = '';
+        switch (category) {
+            case 'auto':
+                debugURL = DEBUG_API.auto;
+                break;
+            case 'install':
+                debugURL = DEBUG_API.install;
+                break;
+            case 'search':
+                debugURL = DEBUG_API.search;
+                debugRes = 'res_search';
+                break;
+            case 'rank':
+                debugURL = DEBUG_API.rank;
+                break;
+            case 'detail':
+                debugURL = DEBUG_API.detail;
+                debugRes = 'res_detail';
+                break;
+            case 'catalog':
+                debugURL = DEBUG_API.catalog;
+                debugRes = 'res_catalog';
+                break;
+            case 'chapter':
+                debugURL = DEBUG_API.chapter;
+                debugRes = 'res_chapter';
+                break;
+            default:
+                debugURL = DEBUG_API.debug;
+                debugRes = '';
+                break;
+        }
+        return [debugURL, debugRes];
+    }
+
+    debug() {
+        let json = this.getJson();
+        if (json !== undefined) {
+            this.debugStatusBar.show();
+            let url = this.settingHost + DEBUG_API['debug'];
+            this.debugStatusBar.show();
+            axios.default.post(url, json)
+                .then((response) => {
+                    vscode.window.showInformationMessage(response.data.message);
+                }
+                ).catch(() => {
+                    vscode.window.showErrorMessage('连接失败！');
+                }
+                );
+            this.debugStatusBar.hide();
+        }
+    }
+
+    debugGet(category: string) {
+        const debugInfo = this.getDebugInfo(category);
+        const debugURL = this.settingHost + debugInfo[0];
+        const debugRes = debugInfo[1];
+        const json = this.getJson();
+        if (json !== undefined) {
+            this.debugStatusBar.show();
+            let url = this.settingHost + DEBUG_API['debug'];
+            axios.default.post(url, json)
+                .then((response) => {
+                    vscode.window.showInformationMessage(response.data.message);
+                    axios.default.get(debugURL, {
+                        params: {
+                            key: this.settingKey
+                        }
+                    }).then((response) => {
+                        if (response.data.message) {
+                            vscode.window.showInformationMessage(response.data.message);
+                        } else {
+                            DebugView.show(response.data, category);
+                            if (category === 'search') {
+                                const res_array: any[] = response.data;
+                                this.context.workspaceState.update(debugRes, res_array);
+                            } else {
+                                this.context.workspaceState.update(debugRes, response.data);
+                            }
+                        }
+                    }).catch(() => {
+                        vscode.window.showErrorMessage('发生错误！');
+                    });
+                }
+                ).catch(() => {
+                    vscode.window.showErrorMessage('连接失败！');
+                }
+                );
+            this.debugStatusBar.hide();
+        }
+    }
+
+    debugPostt(category: string, params: any) {
+        const debugInfo = this.getDebugInfo(category);
+        const debugURL = this.settingHost + debugInfo[0];
+        const debugRes = debugInfo[1];
         this.debugStatusBar.show();
-        axios.default.post(this.settingHost + url, params)
+        axios.default.post(debugURL, params)
             .then(response => {
                 if (response.data.message) {
                     vscode.window.showInformationMessage(response.data.message);
                 } else {
-                    DebugView.show(response.data);
+                    DebugView.show(response.data, category);
+                    if (category === 'catalog') {
+                        const res_array: any[] = response.data;
+                        this.context.workspaceState.update(debugRes, res_array);
+                    } else {
+                        this.context.workspaceState.update(debugRes, response.data);
+                    }
                 }
             }).catch((error => {
                 vscode.window.showErrorMessage(error);
@@ -130,34 +205,23 @@ export class DebugService {
         this.debugStatusBar.hide();
     }
 
-    /**
-     * name
-     */
-    public debugAuto() {
-        const url = '/dev/debug/auto';
-        this.debug();
-        this.debugGet(url);
+
+    debugPost(url: string, params: any) {
+        this.debugStatusBar.show();
+        axios.default.post(this.settingHost + url, params)
+            .then(response => {
+                if (response.data.message) {
+                    vscode.window.showInformationMessage(response.data.message);
+                } else {
+                    DebugView.show(response.data, 'post');
+                }
+            }).catch((error => {
+                vscode.window.showErrorMessage(error);
+            }));
+        this.debugStatusBar.hide();
     }
 
-    /**
-     * name
-     */
-    public debugSearch() {
-        const url = '/dev/debug/search';
-        this.debug();
-        this.debugGet(url);
-    }
-
-    /**
-     * name
-     */
-    public debugRank() {
-        const url = '/dev/debug/rank';
-        this.debug();
-        this.debugGet(url);
-    }
-
-    public async debugDetail() {
+    async debugDetail() {
         const url = '/dev/debug/detail';
         let params = await vscode.env.clipboard.readText();
         vscode.window.showInputBox({
@@ -172,7 +236,7 @@ export class DebugService {
         });
     }
 
-    public async debugCatalog() {
+    async debugCatalog() {
         const url = '/dev/debug/catalog';
         let params = await vscode.env.clipboard.readText();
         vscode.window.showInputBox({
@@ -187,7 +251,7 @@ export class DebugService {
         });
     }
 
-    public async debugChapter() {
+    async debugChapter() {
         const url = '/dev/debug/chapter';
         let params = await vscode.env.clipboard.readText();
         vscode.window.showInputBox({
@@ -202,17 +266,33 @@ export class DebugService {
         });
     }
 
-    public install() {
+    install() {
         const url = '/dev/install';
-        let editor = vscode.window.activeTextEditor;
-        if (editor === undefined) {
-            vscode.window.showErrorMessage('未读取到相应文件，请使用 Vscode 打开书源文件后执行！');
-            this.debugStatusBar.hide();
-            return;
-        }
-        let document = editor.document;
-        let params = document.getText();
+        let params = this.getJson();
         this.debugPost(url, params);
     }
 
+    debugNext(label: string) {
+        let res_array: any[] | undefined;
+        let res_index = 0;
+        switch (label) {
+            case 'detail':
+                res_array = this.context.workspaceState.get('res_search');
+                res_index = (this.searchIndex === undefined) ? 0 : this.searchIndex;
+                break;
+            case 'catalog':
+                res_array = Array(this.context.workspaceState.get('res_detail'));
+                break;
+            case 'chapter':
+                res_array = this.context.workspaceState.get('res_catalog');
+                res_index = (this.catalogIndex === undefined) ? 0 : this.catalogIndex;
+                break;
+            default:
+                res_index = 0;
+                break;
+        }
+        if (res_array !== undefined) {
+            this.debugPostt(label, JSON.stringify(res_array[res_index]));
+        }
+    }
 }

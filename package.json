@@ -3,6 +3,8 @@
 	"displayName": "Awesome DeepInk",
 	"description": "厚墨投屏扩展",
 	"version": "0.0.1",
+	"publisher": "vhxubo",
+	"license": "GPL-3.0",
 	"engines": {
 		"vscode": "^1.42.0"
 	},
@@ -26,15 +28,30 @@
 		"onCommand:deepInk.openJsoup"
 	],
 	"main": "./out/extension.js",
-	"icon": "./res/media/icon.png",
 	"contributes": {
 		"commands": [{
 				"command": "deepInk.setHost",
-				"title": "DeepInk: Set Host"
+				"title": "DeepInk: Set Host",
+				"icon": {
+					"light": "res/media/icon.svg",
+					"dark": "res/media/icon.svg"
+				}
 			},
 			{
 				"command": "deepInk.setKey",
-				"title": "DeepInk: Set Search Key"
+				"title": "DeepInk: Set Search Key",
+				"icon": {
+					"light": "res/media/icon.svg",
+					"dark": "res/media/icon.svg"
+				}
+			},
+			{
+				"command": "deepInk.setIndex",
+				"title": "DeepInk: Set Index",
+				"icon": {
+					"light": "res/media/icon.svg",
+					"dark": "res/media/icon.svg"
+				}
 			},
 			{
 				"command": "deepInk.debug",
@@ -95,7 +112,23 @@
 			{
 				"command": "deepInk.openJsonpath",
 				"title": "DeepInk: Open Jsonpath"
+			},
+			{
+				"command": "deepInk.refresh",
+				"title": "Refresh",
+				"icon": {
+					"light": "res/media/light/refresh.svg",
+					"dark": "res/media/dark/refresh.svg"
+				}
+			}, {
+				"command": "deepInk.debugNext",
+				"title": "Run",
+				"icon": {
+					"light": "res/media/icon.svg",
+					"dark": "res/media/icon.svg"
+				}
 			}
+
 		],
 		"configuration": {
 			"type": "object",
@@ -110,6 +143,16 @@
 					"type": "string",
 					"default": "剑来",
 					"description": "搜索的关键词"
+				},
+				"awesomeDeepInk.searchIndex": {
+					"type": "string",
+					"default": "0",
+					"description": "传递给 detail 的参数 Index (正整数)"
+				},
+				"awesomeDeepInk.catalogIndex": {
+					"type": "string",
+					"default": "0",
+					"description": "传递给 chapter 的参数 Index (正整数)"
 				}
 			}
 		},
@@ -122,6 +165,9 @@
 		},
 		"views": {
 			"deepink-explorer": [{
+					"id": "deepink-setting",
+					"name": "设置"
+				}, {
 					"id": "deepink-debug",
 					"name": "调试"
 				},
@@ -134,22 +180,22 @@
 		"menus": {
 			"view/title": [{
 					"command": "deepInk.setHost",
-					"when": "view == deepink-debug",
-					"group": "more@0"
+					"when": "view == deepink-setting",
+					"group": "navigation@0"
 				},
 				{
 					"command": "deepInk.setKey",
-					"when": "view == deepink-debug",
-					"group": "more@1"
+					"when": "view == deepink-setting",
+					"group": "navigation@1"
 				},
 				{
 					"command": "deepInk.openJsoup",
 					"when": "view == deepink-debug",
-					"group": "more@2"
+					"group": "more@0"
 				}, {
 					"command": "deepInk.openJsonpath",
 					"when": "view == deepink-debug",
-					"group": "more@3"
+					"group": "more@1"
 				},
 				{
 					"command": "deepInk.debug",
@@ -165,11 +211,21 @@
 					"command": "deepInk.debugRank",
 					"when": "view == deepink-debug",
 					"group": "navigation@2"
+				},
+				{
+					"command": "deepInk.debugSearch",
+					"when": "view == deepink-debug",
+					"group": "navigation@3"
+				},
+				{
+					"command": "deepInk.refresh",
+					"when": "view == deepink-debug",
+					"group": "navigation@4"
 				}
 			],
 			"view/item/context": [{
-				"command": "deepInk.debugSearch",
-				"when": "view == deepink-debug&&viewItem == debug",
+				"command": "deepInk.debugNext",
+				"when": "view == deepink-debug&&viewItem == post",
 				"group": "inline"
 			}]
 		},
