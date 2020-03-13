@@ -20,14 +20,13 @@ export class DebugTreeViewProvider implements TreeDataProvider<DebugItem> {
             }
             if (res_array !== undefined) {
                 return res_array.map(
-                    (item: any, index) => new DebugItem(
+                    (item: any) => new DebugItem(
                         JSON.stringify(item),
                         TreeItemCollapsibleState.None,
-                        index,
                         {
-                            command: 'deepInk.setIndex',
+                            command: 'deepInk.debugNext',
                             title: '',
-                            arguments: [label, index]
+                            arguments: [label, item]
                         }
                     )
                 );
@@ -43,8 +42,8 @@ export class DebugTreeViewProvider implements TreeDataProvider<DebugItem> {
         }
     }
 
-    refresh() {
-        this._onDidChangeTreeData.fire();
+    refresh(node?:DebugItem):void {
+        this._onDidChangeTreeData.fire(node);
     }
 
 }
@@ -53,12 +52,11 @@ export class DebugItem extends TreeItem {
     constructor(
         public readonly label: string,
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-        public readonly index?: number,
         public readonly command?: vscode.Command
 
     ) {
         super(label, collapsibleState);
     }
 
-    contextValue = (this.label === 'search') ? 'none' : (this.label === 'catalog' || this.label === 'detail' || this.label === 'chapter') ? 'post' : 'other';
+    contextValue = (this.label === 'search' || this.label === 'catalog' || this.label === 'detail' || this.label === 'chapter') ? 'none' : 'post';
 }

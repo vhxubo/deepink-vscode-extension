@@ -1,0 +1,298 @@
+{
+    "title": "厚墨书源",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "JSON schema for DeepInk BookSources files",
+    "type": "object",
+    "properties": {
+        "name": {
+            "type": "string",
+            "title": "书源名称",
+            "description": "规范命名，请不要带无关符号等"
+        },
+        "url": {
+            "type": "string",
+            "title": "网站域名(书源唯一标识)",
+            "description": "不应带有 http:// 或 https://"
+        },
+        "version": {
+            "type": "integer",
+            "minimum": 100,
+            "default": 100,
+            "title": "版本号",
+            "description": "每次发布时至少加一,默认为 100(100=1.0.0)"
+        },
+        "search": {
+            "type": "object",
+            "title": "搜索",
+            "properties": {
+                "url": {
+                    "type": "string",
+                    "title": "搜索地址",
+                    "description": "${key} 代表搜索关键词，搜索时自动替换为用户输入的词"
+                },
+                "charset": {
+                    "type": "string",
+                    "default": "utf-8",
+                    "title": "关键词编码",
+                    "examples": ["utf-8", "gbk"]
+                },
+                "list": {
+                    "type": "string",
+                    "title": "列表",
+                    "description": "提取结果元素的相同特征"
+                },
+                "name": {
+                    "type": "string",
+                    "title": "书名",
+                    "description": "必填项"
+                },
+                "author": {
+                    "type": "string",
+                    "title": "作者"
+                },
+                "cover": {
+                    "type": "string",
+                    "title": "封面",
+                    "description": "厚墨自动补全 URL"
+                },
+                "summary": {
+                    "type": "string",
+                    "title": "简介"
+                },
+                "detail": {
+                    "type": "string",
+                    "title": "详情",
+                    "description": "厚墨自动补全 URL"
+                }
+            },
+            "required": ["url", "charset", "list", "name", "detail"]
+        },
+        "detail": {
+            "type": "object",
+            "title": "图书详情",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "title": "书名",
+                    "description": "搜索无此字段则必填，搜索有此字段选填"
+                },
+                "author": {
+                    "type": "string",
+                    "title": "作者",
+                    "description": "搜索无此字段则必填，搜索有此字段选填"
+                },
+                "cover": {
+                    "type": "string",
+                    "title": "封面",
+                    "description": "搜索无此字段则必填，搜索有此字段选填"
+                },
+                "summary": {
+                    "type": "string",
+                    "title": "简介",
+                    "description": "搜索无此字段则必填，搜索有此字段选填"
+                },
+                "status": {
+                    "type": "string",
+                    "title": "状态"
+                },
+                "update": {
+                    "type": "string",
+                    "title": "更新时间"
+                },
+                "lastChapter": {
+                    "type": "string",
+                    "title": "最新章节"
+                },
+                "catalog": {
+                    "type": "string",
+                    "title": "目录地址",
+                    "description": "不填视为目录和详情相同地址"
+                }
+            }
+        },
+        "catalog": {
+            "type": "object",
+            "title": "目录",
+            "properties": {
+                "list": {
+                    "type": "string",
+                    "title": "目录",
+                    "description": "章节或分卷列表"
+                },
+                "orderBy": {
+                    "type": "integer",
+                    "default": 0,
+                    "enum": [0, 1, 2, 3],
+                    "title": "排序方式",
+                    "description": "0 - 分卷正序章节正序\n1 - 分卷倒序章节倒序\n2 - 分卷正序章节倒序\n3 - 分卷倒序章节正序"
+                },
+                "booklet": {
+                    "type": "object",
+                    "title": "分卷",
+                    "description": "存在分卷描述",
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "title": "分卷名"
+                        },
+                        "list": {
+                            "type": "string",
+                            "title": "章节列表"
+                        }
+                    },
+                    "required": ["list", "name"]
+                },
+                "name": {
+                    "type": "string",
+                    "title": "章节标题"
+                },
+                "chapter": {
+                    "type": "string",
+                    "title": "章节",
+                    "description": "厚墨自动补全 URL"
+                },
+                "page": {
+                    "type": "string",
+                    "title": "分页",
+                    "description": "下一页链接元素"
+                }
+            },
+            "required": ["list", "name", "chapter"]
+        },
+        "chapter": {
+            "type": "object",
+            "title": "正文",
+            "properties": {
+                "content": {
+                    "type": "string",
+                    "title": "正文",
+                    "description": "当返回 txt 文本时不需填写该字段"
+                },
+                "filter": {
+                    "type": "array",
+                    "title": "过滤标签",
+                    "description": "支持 CSSQuery 和 标签(例如：@div)",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "purify": {
+                    "type": "array",
+                    "title": "屏蔽规则",
+                    "description": "正则表达式",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "page": {
+                    "type": "string",
+                    "title": "分页",
+                    "description": "下一页链接元素"
+                }
+            }
+        },
+        "auth": {
+            "type": "object",
+            "title": "账号授权",
+            "description": "当网站需要账号登录或购买章节后才能阅读时,需要使用此功能",
+            "properties": {
+                "login": {
+                    "type": "string",
+                    "title": "账号登录地址"
+                },
+                "cookie": {
+                    "type": "string",
+                    "title": "账号登录会话依据",
+                    "description": "判断方法：在浏览器中登录账号后，禁用某个cookie时刷新网页需要重新登录，则说明是该cookie"
+                },
+                "params": {
+                    "type": "string",
+                    "description": "适用于网站全局请求都需要统一附带参数，该参数中的${xxx}会自动使用cookie中的同名参数值"
+                },
+                "header": {
+                    "type": "string",
+                    "description": "适用于网站全局请求都需要统一附带Header，该参数中的${xxx}会自动使用cookie中的同名参数值"
+                },
+                "verify": {
+                    "type": "string",
+                    "title": "验证账号授权地址",
+                    "description": "推荐使用个人中心页"
+                },
+                "logged": {
+                    "type": "string",
+                    "title": "授权验证依据",
+                    "description": "检查指定元素的值，如果等于条件说明已登录"
+                },
+                "vip": {
+                    "type": "string",
+                    "title": "VIP章节判断依据",
+                    "description": "检查指定元素的值，如果等于条件说明是VIP章节"
+                },
+                "buy": {
+                    "type": "string",
+                    "title": "已购章节判断依据",
+                    "description": "检查指定元素的值，如果等于条件说明是已购章节"
+                }
+            },
+            "required": ["login", "cookie", "verify", "logged"]
+        },
+        "rank": {
+            "type": "array",
+            "title": "排行榜",
+            "description": "",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "title": "排行榜名字",
+                        "description": "推荐长度相同的3～5个字"
+                    },
+                    "url": {
+                        "title": "排行榜地址",
+                        "description": "${key}表明存在分类，对应categories中的key；${page}表明存在分页，对应字段page值"
+                    },
+                    "page": {
+                        "title": "起始页码"
+                    },
+                    "size": {
+                        "title": "单页数据总数"
+                    },
+                    "unit": {
+                        "title": "页码跨度",
+                        "description": "默认1，填写-1是倒序 page-1"
+                    },
+                    "categories": {
+                        "title": "分类",
+                        "description": "key填充url中的引用，value是该分类的显示名"
+                    },
+                    "list": {
+                        "title": "图书列表",
+                        "description": "不填默认使用search中的list"
+                    },
+                    "name": {
+                        "title": "书名",
+                        "description": "不填默认使用search中的name"
+                    },
+                    "author": {
+                        "title": "作者",
+                        "description": "不填默认使用search中的author"
+                    },
+                    "cover": {
+                        "title": "封面",
+                        "description": "不填默认使用search中的cover"
+                    },
+                    "summary": {
+                        "title": "简介",
+                        "description": "不填默认使用search中的summary"
+                    },
+                    "detail": {
+                        "title": "详情",
+                        "description": "不填默认使用search中的detail"
+                    }
+                },
+                "required": ["title", "url"]
+            }
+        }
+    },
+    "required": ["name", "url", "version", "search", "detail", "chapter"]
+}

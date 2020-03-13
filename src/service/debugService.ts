@@ -2,7 +2,6 @@ import * as vscode from "vscode";
 import { StatusBar } from "../utils/statusBar";
 import * as axios from "axios";
 import { DebugView } from '../view/debugView';
-import { DebugItem } from "../view/debugTreeViewProvider";
 
 export const DEBUG_API = {
     debug: '/dev/debug',
@@ -19,8 +18,6 @@ export class DebugService {
     private debugStatusBar: StatusBar;
     private settingHost: string | undefined;
     private settingKey: string | undefined;
-    private searchIndex: number | undefined;
-    private catalogIndex: number | undefined;
 
     constructor(
         protected context: vscode.ExtensionContext
@@ -28,52 +25,6 @@ export class DebugService {
         this.debugStatusBar = new StatusBar();
         this.settingHost = vscode.workspace.getConfiguration().get('awesomeDeepInk.host');
         this.settingKey = vscode.workspace.getConfiguration().get('awesomeDeepInk.key');
-        this.searchIndex = Number(vscode.workspace.getConfiguration().get('awesomeDeepInk.searchIndex'));
-        this.catalogIndex = Number(vscode.workspace.getConfiguration().get('awesomeDeepInk.catalogIndex'));
-    }
-
-    setHost() {
-        let value = 'http://192.168.1.112:8888';
-        if (this.settingHost !== undefined) { value = this.settingHost; }
-        vscode.window.showInputBox({
-            ignoreFocusOut: true,
-            password: false,
-            prompt: "输入厚墨投屏显示的完整连接。",
-            value: value
-        }).then((host: any) => {
-            if (host !== undefined || host.trim() !== '') {
-                vscode.workspace.getConfiguration().update('awesomeDeepInk.host', host, true);
-                this.settingHost = host;
-                axios.default.get(host + '/api/user').then((response) => {
-                    vscode.window.showInformationMessage(`${response.data.name}，欢迎回来！`);
-                }).catch((error => {
-                    vscode.window.showErrorMessage('连接 ' + this.settingHost + ' 失败！\n' + error);
-                }));
-            }
-        });
-    }
-
-    setIndex(label: string, index: number) {
-        if (index !== undefined && (label === 'search' || label === 'catalog')) {
-            vscode.workspace.getConfiguration().update('awesomeDeepInk.' + label + 'Index', index, true);
-        }
-
-    }
-
-    setKey() {
-        let value = '剑来';
-        if (this.settingKey !== undefined) { value = this.settingKey; }
-        vscode.window.showInputBox({
-            ignoreFocusOut: true,
-            password: false,
-            prompt: "输入搜索关键词。",
-            value: value
-        }).then((key: any) => {
-            if (key !== undefined || key.trim() !== '') {
-                vscode.workspace.getConfiguration().update('awesomeDeepInk.key', key, true);
-                this.settingKey = key;
-            }
-        });
     }
 
     getJson() {
@@ -181,7 +132,7 @@ export class DebugService {
         }
     }
 
-    debugPostt(category: string, params: any) {
+    debugPost(category: string, params: any) {
         const debugInfo = this.getDebugInfo(category);
         const debugURL = this.settingHost + debugInfo[0];
         const debugRes = debugInfo[1];
@@ -205,94 +156,33 @@ export class DebugService {
         this.debugStatusBar.hide();
     }
 
-
-    debugPost(url: string, params: any) {
-        this.debugStatusBar.show();
-        axios.default.post(this.settingHost + url, params)
-            .then(response => {
-                if (response.data.message) {
-                    vscode.window.showInformationMessage(response.data.message);
-                } else {
-                    DebugView.show(response.data, 'post');
-                }
-            }).catch((error => {
-                vscode.window.showErrorMessage(error);
-            }));
-        this.debugStatusBar.hide();
-    }
-
-    async debugDetail() {
-        const url = '/dev/debug/detail';
-        let params = await vscode.env.clipboard.readText();
-        vscode.window.showInputBox({
-            ignoreFocusOut: true,
-            password: false,
-            prompt: "输入搜索的一个结果。",
-            value: params
-        }).then((params: any) => {
-            if (params !== undefined || params.trim() !== '') {
-                this.debugPost(url, params);
-            }
-        });
-    }
-
-    async debugCatalog() {
-        const url = '/dev/debug/catalog';
-        let params = await vscode.env.clipboard.readText();
-        vscode.window.showInputBox({
-            ignoreFocusOut: true,
-            password: false,
-            prompt: "输入详情结果。",
-            value: params
-        }).then((params: any) => {
-            if (params !== undefined || params.trim() !== '') {
-                this.debugPost(url, params);
-            }
-        });
-    }
-
-    async debugChapter() {
-        const url = '/dev/debug/chapter';
-        let params = await vscode.env.clipboard.readText();
-        vscode.window.showInputBox({
-            ignoreFocusOut: true,
-            password: false,
-            prompt: "输入目录的一个结果。",
-            value: params
-        }).then((params: any) => {
-            if (params !== undefined || params.trim() !== '') {
-                this.debugPost(url, params);
-            }
-        });
-    }
-
     install() {
-        const url = '/dev/install';
         let params = this.getJson();
-        this.debugPost(url, params);
+        this.debugPost('install', params);
     }
 
-    debugNext(label: string) {
-        let res_array: any[] | undefined;
-        let res_index = 0;
-        switch (label) {
+    debugNext(category: string, params: any) {
+        let catalogNext = 'detail';
+        params = JSON.stringify(params);
+        switch (category) {
+            case 'search':
+                catalogNext = 'detail';
+                break;
             case 'detail':
-                res_array = this.context.workspaceState.get('res_search');
-                res_index = (this.searchIndex === undefined) ? 0 : this.searchIndex;
+                catalogNext = 'catalog';
                 break;
             case 'catalog':
-                res_array = Array(this.context.workspaceState.get('res_detail'));
+                catalogNext = 'chapter';
                 break;
             case 'chapter':
-                res_array = this.context.workspaceState.get('res_catalog');
-                res_index = (this.catalogIndex === undefined) ? 0 : this.catalogIndex;
+                catalogNext = 'install';
+                params = this.getJson();
                 break;
             default:
-                res_index = 0;
                 break;
         }
-        if (res_array !== undefined) {
-            this.debugPostt(label, JSON.stringify(res_array[res_index]));
+        if (params !== undefined) {
+            this.debugPost(catalogNext, params);
         }
     }
 }

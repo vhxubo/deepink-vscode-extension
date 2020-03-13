@@ -20,12 +20,9 @@
 		"onCommand:deepInk.debugRank",
 		"onCommand:deepInk.debugSearch",
 		"onCommand:deepInk.install",
-		"onCommand:deepInk.debugDetail",
-		"onCommand:deepInk.debugCatalog",
-		"onCommand:deepInk.debugChapter",
 		"onView:deepink-explorer",
-		"onCommand:deepInk.openJsonpath",
-		"onCommand:deepInk.openJsoup"
+		"onCommand:deepInk.openJsoup",
+		"onCommand:deepInk.openJsonpath"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -33,76 +30,56 @@
 				"command": "deepInk.setHost",
 				"title": "DeepInk: Set Host",
 				"icon": {
-					"light": "res/media/icon.svg",
-					"dark": "res/media/icon.svg"
+					"light": "res/images/icon.svg",
+					"dark": "res/images/icon.svg"
 				}
 			},
 			{
 				"command": "deepInk.setKey",
 				"title": "DeepInk: Set Search Key",
 				"icon": {
-					"light": "res/media/icon.svg",
-					"dark": "res/media/icon.svg"
-				}
-			},
-			{
-				"command": "deepInk.setIndex",
-				"title": "DeepInk: Set Index",
-				"icon": {
-					"light": "res/media/icon.svg",
-					"dark": "res/media/icon.svg"
+					"light": "res/images/icon.svg",
+					"dark": "res/images/icon.svg"
 				}
 			},
 			{
 				"command": "deepInk.debug",
 				"title": "DeepInk: Debug Set Source",
 				"icon": {
-					"light": "res/media/icon.svg",
-					"dark": "res/media/icon.svg"
+					"light": "res/images/icon.svg",
+					"dark": "res/images/icon.svg"
 				}
 			},
 			{
 				"command": "deepInk.debugAuto",
 				"title": "DeepInk: Debug Auto",
 				"icon": {
-					"light": "res/media/icon.svg",
-					"dark": "res/media/icon.svg"
+					"light": "res/images/icon.svg",
+					"dark": "res/images/icon.svg"
 				}
 			},
 			{
 				"command": "deepInk.debugRank",
 				"title": "DeepInk: Debug Rank",
 				"icon": {
-					"light": "res/media/icon.svg",
-					"dark": "res/media/icon.svg"
+					"light": "res/images/icon.svg",
+					"dark": "res/images/icon.svg"
 				}
 			},
 			{
 				"command": "deepInk.debugSearch",
 				"title": "DeepInk: Debug Search",
 				"icon": {
-					"light": "res/media/icon.svg",
-					"dark": "res/media/icon.svg"
+					"light": "res/images/icon.svg",
+					"dark": "res/images/icon.svg"
 				}
-			},
-			{
-				"command": "deepInk.debugDetail",
-				"title": "DeepInk: Debug Detail"
-			},
-			{
-				"command": "deepInk.debugCatalog",
-				"title": "DeepInk: Debug Catalog"
-			},
-			{
-				"command": "deepInk.debugChapter",
-				"title": "DeepInk: Debug Chapter"
 			},
 			{
 				"command": "deepInk.install",
 				"title": "DeepInk: Install",
 				"icon": {
-					"light": "res/media/icon.svg",
-					"dark": "res/media/icon.svg"
+					"light": "res/images/icon.svg",
+					"dark": "res/images/icon.svg"
 				}
 			},
 			{
@@ -117,15 +94,15 @@
 				"command": "deepInk.refresh",
 				"title": "Refresh",
 				"icon": {
-					"light": "res/media/light/refresh.svg",
-					"dark": "res/media/dark/refresh.svg"
+					"light": "res/images/light/refresh.svg",
+					"dark": "res/images/dark/refresh.svg"
 				}
 			}, {
 				"command": "deepInk.debugNext",
 				"title": "Run",
 				"icon": {
-					"light": "res/media/icon.svg",
-					"dark": "res/media/icon.svg"
+					"light": "res/images/icon.svg",
+					"dark": "res/images/icon.svg"
 				}
 			}
 
@@ -143,16 +120,6 @@
 					"type": "string",
 					"default": "剑来",
 					"description": "搜索的关键词"
-				},
-				"awesomeDeepInk.searchIndex": {
-					"type": "string",
-					"default": "0",
-					"description": "传递给 detail 的参数 Index (正整数)"
-				},
-				"awesomeDeepInk.catalogIndex": {
-					"type": "string",
-					"default": "0",
-					"description": "传递给 chapter 的参数 Index (正整数)"
 				}
 			}
 		},
@@ -160,22 +127,17 @@
 			"activitybar": [{
 				"id": "deepink-explorer",
 				"title": "厚墨",
-				"icon": "res/media/icon.svg"
+				"icon": "res/images/icon.svg"
 			}]
 		},
 		"views": {
 			"deepink-explorer": [{
-					"id": "deepink-setting",
-					"name": "设置"
-				}, {
-					"id": "deepink-debug",
-					"name": "调试"
-				},
-				{
-					"id": "deepink-read",
-					"name": "阅读"
-				}
-			]
+				"id": "deepink-setting",
+				"name": "设置"
+			}, {
+				"id": "deepink-debug",
+				"name": "调试"
+			}]
 		},
 		"menus": {
 			"view/title": [{
@@ -222,16 +184,15 @@
 					"when": "view == deepink-debug",
 					"group": "navigation@4"
 				}
-			],
-			"view/item/context": [{
-				"command": "deepInk.debugNext",
-				"when": "view == deepink-debug&&viewItem == post",
-				"group": "inline"
-			}]
+			]
 		},
 		"snippets": [{
 			"language": "json",
 			"path": "snippets.json"
+		}],
+		"jsonValidation": [{
+			"fileMatch": "*.json",
+			"url": "./schema.json"
 		}]
 	},
 	"scripts": {

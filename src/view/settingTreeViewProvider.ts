@@ -20,21 +20,36 @@ export class SettingTreeViewProvider implements TreeDataProvider<SettingItem> {
                 return [this.settingHost, this.settingKey].map(
                     item => new SettingItem(
                         (item === undefined) ? '' : item,
-                        TreeItemCollapsibleState.None
+                        TreeItemCollapsibleState.None,
+                        {
+                            command: (item?.indexOf('http') === 0) ? 'deepInk.setHost' : 'deepInk.setKey',
+                            title: '',
+                            arguments: []
+                        }
                     )
                 );
             } else if (element.label === 'Host') {
                 return ['http://192.168.0.102:8888', 'http://192.168.43.1:8888'].map(
                     item => new SettingItem(
                         (item === undefined) ? '' : item,
-                        TreeItemCollapsibleState.None
+                        TreeItemCollapsibleState.None,
+                        {
+                            command: 'deepInk.setHost',
+                            title: '',
+                            arguments: [item]
+                        }
                     )
                 );
             } else if (element.label === 'Key') {
                 return ['剑来', '孟子', '小姨子'].map(
                     item => new SettingItem(
                         (item === undefined) ? '' : item,
-                        TreeItemCollapsibleState.None
+                        TreeItemCollapsibleState.None,
+                        {
+                            command: 'deepInk.setKey',
+                            title: '',
+                            arguments: [item]
+                        }
                     )
                 );
             }
