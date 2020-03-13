@@ -2,17 +2,13 @@
 
 一款支持厚墨书源可视化调试的插件，需要配合`厚墨`的投屏功能（发现 -> 设置 -> 投屏）。
 
-TODO 状态提示
-TODO 代码优化，解耦
-TODO 树形框刷新，下一页
-
 ## 功能
 
 - **代码片段**
 
   在 .json 文件中键入 `deepInkBook`，可获得基础书源模板
 
-  ![deepInkBook](https://github.com/chimisgo)
+  ![deepInkBook](https://raw.githubusercontent.com/vhxubo/deepink-vscode-extension/master/res/media/deepinkbook.gif)
 
 - **代码规范**
 
@@ -21,7 +17,7 @@ TODO 树形框刷新，下一页
   - 验证字段格式
   - 强制要求填写必填项
 
-  ![schema](https://github.com/chimisgo)
+  ![schema](https://raw.githubusercontent.com/vhxubo/deepink-vscode-extension/master/res/media/deepinkschema.gif)
 
   schema 可独立于该插件使用，在 .json 中添加如下字段即可
 
